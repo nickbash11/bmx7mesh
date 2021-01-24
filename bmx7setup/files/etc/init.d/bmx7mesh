@@ -1,0 +1,41 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+STOP=99
+
+CONTROL="/bmx7mesh"
+SETUP="/usr/sbin/bmx7mesh_setup.sh"
+
+configure() {
+	cp /etc/config/system /etc/config/system.bak
+	uci set system.@system[0].hostname="$(${SETUP} hostname)"
+	uci commit
+	cp /etc/config/network /etc/config/network.bak
+	${SETUP} network > /etc/config/network
+	cp /etc/config/wireless /etc/config/wireless.bak
+	${SETUP} wireless > /etc/config/wireless
+	cp /etc/config/bmx7 /etc/config/bmx7.bak
+	${SETUP} bmx7 > /etc/config/bmx7
+	echo "* * * * * /usr/sbin/bmx7health.sh >> /tmp/log/bmx7health.log" >> /etc/crontabs/root
+	echo "* * * * * /usr/sbin/kickwifi.sh" >> /etc/crontabs/root
+	sed -i '3i\sh /etc/firewall.user' /etc/rc.local
+	echo "/bmx7mesh" >> /etc/sysupgrade.conf
+	touch $CONTROL
+	reboot
+}
+
+start() {
+	if [ ! -e "$CONTROL" ]; then
+		configure
+	fi
+}
+ 
+stop() {
+	nothing to do
+}
+
+restart()
+{
+	stop
+	start
+}

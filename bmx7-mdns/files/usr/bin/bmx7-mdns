@@ -1,0 +1,49 @@
+#!/bin/sh
+
+while true; do
+	# touch /etc/mdns/push it does not exist
+	if [[ ! -f /etc/mdns/push ]]
+	then
+		touch /etc/mdns/push
+	fi
+
+	# compare md5sum
+	md5snd=$(cat /etc/mdns/push | md5sum | awk '{print $1}')
+	if [[ "$md5snd" != "$md5snd_prev" ]]
+	then
+		# extract records from file
+		if [[ -n "$(cat /etc/mdns/push | grep -v '#')" ]]
+		then
+			cat /etc/mdns/push | grep -v '#' > /var/run/bmx7/sms/sendSms/mdns
+			bmx7 -c --syncSms mdns
+			sleep 3
+		# delete sms file if there are no records
+		elif [[ -f /var/run/bmx7/sms/sendSms/mdns ]]
+		then
+			rm /var/run/bmx7/sms/sendSms/mdns
+			bmx7 -c --syncSms mdns
+			sleep 3
+		fi
+	fi
+	md5snd_prev=$md5snd
+
+	# find files with :mdns postfix
+	if [[ -n "$(find /var/run/bmx7/sms/rcvdSms/ -maxdepth 1 -name '*:mdns' -print)" ]]
+	then
+		md5rcv=$(cat /var/run/bmx7/sms/rcvdSms/*:mdns | md5sum | awk '{print $1}')
+		# compare md5sum
+		if [[ "$md5rcv" != "$md5rcv_prev" ]]
+		then
+			cat /var/run/bmx7/sms/rcvdSms/*:mdns > /tmp/hosts/hosts.mdns
+			killall -HUP dnsmasq
+		fi
+
+		md5rcv_prev=$md5rcv
+	else
+		sleep 30
+		continue
+	fi
+
+	# wait for some event
+	inotifywait -e modify -e create -e delete -q /etc/mdns/ /var/run/bmx7/sms/rcvdSms/ --include "mdns|push"
+done

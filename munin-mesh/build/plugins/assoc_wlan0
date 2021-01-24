@@ -1,0 +1,27 @@
+#!/bin/sh
+
+INTERFACE=${0##*assoc_}
+
+config() {
+echo "graph_title 802.11s associations"
+echo "graph_args --base 1000 -l 0 "
+echo "graph_vlabel Number of 802.11s associations"
+echo "graph_category mesh"
+echo "graph_info This graph shows the number of nodes which associated"
+echo "assoc.label associations"
+echo "assoc.draw LINE1"
+echo "assoc.info 802.11s nodes"
+}
+
+
+print() {
+	echo "assoc.value $(iw dev $INTERFACE station dump | grep Station | wc -l)"
+}
+
+
+if [ "$1" == "config" ]
+  then
+    config
+  else
+    print
+fi
