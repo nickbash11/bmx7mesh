@@ -45,5 +45,5 @@ while true; do
 	fi
 
 	# wait for some event
-	inotifywait -e modify -e create -e delete -q /etc/mdns/ /var/run/bmx7/sms/rcvdSms/ --include "mdns|push"
+	inotifywait -e modify -e create -e delete -q /etc/mdns/ /var/run/bmx7/sms/rcvdSms/ --include "mdns|push" || sleep 10
 done
