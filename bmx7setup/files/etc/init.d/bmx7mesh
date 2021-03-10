@@ -20,6 +20,8 @@ configure() {
 	echo "* * * * * /usr/sbin/kickwifi.sh" >> /etc/crontabs/root
 	sed -i '3i\sh /etc/firewall.user' /etc/rc.local
 	echo "/bmx7mesh" >> /etc/sysupgrade.conf
+	echo "/etc/firewall.user" >> /etc/sysupgrade.conf
+	sed -i '/openwrt_bmx7mesh/d' /etc/opkg/distfeeds.conf
 	touch $CONTROL
 	reboot
 }
