@@ -18,7 +18,7 @@ echo "links.info Mesh links (neighbours)"
 print() {
 #	echo "nodes.value $(qmpinfo nodes | wc -l)"
 #	echo "links.value $(qmpinfo links | wc -l)"
-	echo "nodes.value $(bmx7 -c originators | egrep -v 'originators|lastRef' | wc -l)"
+	echo "nodes.value $(bmx7 -c originators | egrep -v 'originators|lastRef|ORIGINATORS:' | wc -l)"
 	echo "links.value $(bmx7 -c links | egrep -v 'LINKS:|linkKeys' | wc -l)"
 }
 
